@@ -2,12 +2,15 @@ package com.jaenyeong.jpabook.jpashop.api;
 
 import com.jaenyeong.jpabook.jpashop.domain.Member;
 import com.jaenyeong.jpabook.jpashop.service.MemberService;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,6 +40,34 @@ public class MemberApiController {
         memberService.update(id, request.getName());
         final Member findMember = memberService.findOne(id);
         return new UpdateMemberResponse(findMember.getId(), findMember.getName());
+    }
+
+    @GetMapping("/api/v1/members")
+    public List<Member> membersV1() {
+        return memberService.findMembers();
+    }
+
+    @GetMapping("/api/v2/members")
+    public Result<List<MemberDto>> membersV2() {
+        final List<Member> findMembers = memberService.findMembers();
+        final List<MemberDto> memberDtos = findMembers.stream()
+            .map(member -> new MemberDto(member.getName()))
+            .collect(Collectors.toList());
+
+        return new Result<>(memberDtos.size(), memberDtos);
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class Result<T> {
+        private int size;
+        private T data;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class MemberDto {
+        private String name;
     }
 
     @Data

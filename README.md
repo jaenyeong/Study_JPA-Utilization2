@@ -48,6 +48,8 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 ### API 스펙을 위한 별도의 DTO 클래스 생성
 * 유효성 검사 기준 등이 다른 두 방식(`Presentation(화면 템플릿)`, `API`)이 혼재하면 엔티티가 지저분해짐
 * 같은 API 방식이라도 엔티티를 사용할 때 유효성 검사 등의 기준이 다를 수 있음
+  * `@JsonIgnore`, `@NotEmpty` 등과 같은 조건들이 API마다 다르면 구현이 어려워짐
+  * 또한 컬렉션을 그대로 반환하게 되면 추후 API 스펙 확장이 어려움
 * 엔티티를 계층간 데이터 전송시에 사용하지 말고 전송을 위한 DTO를 생성해 사용할 것
 
 ### CQS (Command and Query Separation)
