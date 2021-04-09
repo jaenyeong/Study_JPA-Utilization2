@@ -1,0 +1,23 @@
+spring:
+  # 스프링부트는 별도의 설정을 하지 않으면 기본적으로 인메모리 방식 적용
+#  datasource:
+#    # 인메모리 H2 사용
+#    url: jdbc:h2:mem:test
+#    username: sa
+#    password:
+#    driver-class-name: org.h2.Driver
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: create-drop
+#    properties:
+#      hibernate:
+#        # System.out.print를 통해 출력
+##      show_sql: true
+#      format_sql: true
+
+logging.level:
+  # 로거를 통해 출력
+  org.hibernate.SQL: debug
+  # 바인딩 되는 변수값 확인
+  org.hibernate.type: trace
