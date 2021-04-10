@@ -96,7 +96,7 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 * 결론적으로 `Hibernate5Module` 사용해 `Entity`를 직접 반환하지말고 DTO 사용할 것
   * 또한 지연 로딩을 피하기 위해 즉시(`EAGER`) 로딩으로 설정한다면 성능 이슈가 발생할 수 있음
 
-### 주문 주회 V1, V2의 공통적인 문제점
+### 주문 조회 V1, V2의 공통적인 문제점
 * 지연 로딩때문에 DB 쿼리가 너무 많이 호출되어 성능 이슈 발생
   * `N + 1`문제 발생
   * 예제에서 `order` 조회 1번, `order -> member` 지연 로딩 조회 `N`번, `order -> delivery` 지연 로딩 조회 `N`번
