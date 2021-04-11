@@ -123,3 +123,9 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 2. 필요하면 `fetch join`으로 성능을 최적화 (이걸로 대부분의 성능 이슈가 해결됨)
 3. 그래도 안되면 `DTO`로 직접 조회하는 방법 사용
 4. 최후의 방법은 JPA가 제공하는 `Native SQL`이나 `Spring JDBC Template`을 사용해 `SQL`을 직접 사용
+
+## 컬렉션 조회 최적화
+
+### 주문 조회 (Order API) V1
+* 현재 `Hibernate5Module`을 사용한 상태라 `orderItems`의 지연 로딩을 강제로 초기화
+* 역시나 엔티티를 직접 노출하는 형태이기 때문에 사용 금지
