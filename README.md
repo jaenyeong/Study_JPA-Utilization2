@@ -129,3 +129,7 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 ### 주문 조회 (Order API) V1
 * 현재 `Hibernate5Module`을 사용한 상태라 `orderItems`의 지연 로딩을 강제로 초기화
 * 역시나 엔티티를 직접 노출하는 형태이기 때문에 사용 금지
+
+### 주문 조회 (Order API) V2
+* `DTO` 안에도 엔티티가 직접 포함되면 안됨
+  * 예제에서 `OrderDto` 안에 `OrderItem` 리스트를 `OrderItemDto`로 변환한 리스트를 사용
