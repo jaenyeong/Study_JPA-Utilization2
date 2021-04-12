@@ -1,7 +1,9 @@
 package com.jaenyeong.jpabook.jpashop.repository;
 
 import com.jaenyeong.jpabook.jpashop.domain.Order;
-import lombok.RequiredArgsConstructor;
+import com.jaenyeong.jpabook.jpashop.domain.OrderStatus;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -11,11 +13,20 @@ import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jaenyeong.jpabook.jpashop.domain.QMember.member;
+import static com.jaenyeong.jpabook.jpashop.domain.QOrder.order;
+
 @Repository
-@RequiredArgsConstructor
 public class OrderRepository {
 
     private final EntityManager em;
+
+    private final JPAQueryFactory query;
+
+    public OrderRepository(final EntityManager em) {
+        this.em = em;
+        this.query = new JPAQueryFactory(em);
+    }
 
     public void save(final Order order) {
         em.persist(order);
@@ -63,6 +74,36 @@ public class OrderRepository {
         final TypedQuery<Order> resultQuery = em.createQuery(criteriaQuery).setMaxResults(1_000);
 
         return resultQuery.getResultList();
+    }
+
+    public List<Order> findAllByQueryDsl(final OrderSearch orderSearch) {
+        return query
+            .select(order)
+            .from(order)
+            .join(order.member, member)
+            // 같은 로직이나 정적 쿼리
+//            .where(order.status.eq(orderSearch.getOrderStatus()))
+            .where(statusEq(orderSearch.getOrderStatus()), nameLike(orderSearch.getMemberName()))
+            .limit(1000)
+            .fetch();
+    }
+
+    private BooleanExpression statusEq(final OrderStatus statusCondition) {
+        // 동적 쿼리를 위한 null 처리
+        if (statusCondition == null) {
+            return null;
+        }
+
+        return order.status.eq(statusCondition);
+    }
+
+    private BooleanExpression nameLike(final String memberName) {
+        // 동적 쿼리를 위한 null 처리
+        if (!StringUtils.hasText(memberName)) {
+            return null;
+        }
+
+        return member.name.like(memberName);
     }
 
     public List<Order> findAllWithMemberDelivery() {

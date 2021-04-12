@@ -316,3 +316,92 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 * `JpaRepository`라는 인터페이스에서 기본적인 `CRUD`를 모두 제공
 * `findByName`처럼 일반화 하기 어려운 기능도 메서드 이름으로 정확한 JPQL 쿼리를 실행
   * `select m from member m where m.name = :name`
+
+## Query DSL
+* `JPQL`을 자바로 작성할 수 있게 도와주는 도구 (`JPQL`을 코드로 만드는 빌더 역할)
+
+### 특징
+* `JPQL`과 달리 오타를 컴파일 타임에 확인 가능
+* 직관적인 문법
+* 동적 쿼리를 사용할 때 유용함
+* 코드 자동완성
+* 코드 재사용 가능
+* `Q*` 파일 생성 필요
+
+### build.gradle 설정
+Query DSL 임포트 및 파일 설정
+~~~
+buildscript {
+    dependencies {
+        classpath("gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10")
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.4.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+apply plugin: "com.ewerk.gradle.plugins.querydsl"
+
+group = 'com.jaenyeong'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.6.3'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5'
+    implementation 'com.querydsl:querydsl-jpa' // Query Dsl 추가
+    implementation 'com.querydsl:querydsl-apt' // Query Dsl 추가
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.h2database:h2'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+//querydsl 추가
+def querydslDir = "$buildDir/generated/querydsl"
+querydsl {
+    library = "com.querydsl:querydsl-apt"
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', querydslDir]
+        }
+    }
+}
+
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
+}
+
+configurations {
+    querydsl.extendsFrom compileClasspath
+}
+
+test {
+    useJUnitPlatform()
+}
+~~~
+* `gradle` > `compileQueryDsl` 실행
+* `build/generated/querydsl` 경로에 패키지 및 `Q*` 파일 생성 확인
