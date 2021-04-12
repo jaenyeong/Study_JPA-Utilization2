@@ -86,4 +86,17 @@ public class OrderRepository {
             .setMaxResults(100)
             .getResultList();
     }
+
+    public List<Order> findAllWithMemberDelivery(final int offset, final int limit) {
+        return em.createQuery(
+            "select o from Order o"
+                // default_batch_fetch_size 옵션으로 멤버와 딜리버리 생략해도 IN 쿼리로 가져오게 됨
+                // 하지만 DB 쿼리 호출 수 때문에 *ToOne 연관 관계는 join fetch로 가져오는 것이 효율적
+                + " join fetch o.member m"
+                + " join fetch o.delivery d",
+            Order.class)
+            .setFirstResult(offset)
+            .setMaxResults(limit)
+            .getResultList();
+    }
 }

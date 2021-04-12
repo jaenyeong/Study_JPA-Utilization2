@@ -29,6 +29,8 @@ public class Order {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    // application.yml 파일에서 한 번에 설정
+//    @BatchSize(size = 1000)
     @OneToMany(mappedBy = "order", cascade = ALL)
     private final List<OrderItem> orderItems = new ArrayList<>();
 

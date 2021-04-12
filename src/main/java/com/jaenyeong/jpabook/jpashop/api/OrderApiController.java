@@ -9,6 +9,7 @@ import com.jaenyeong.jpabook.jpashop.repository.OrderSearch;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -58,6 +59,7 @@ public class OrderApiController {
             this.orderStatus = order.getStatus();
             this.address = order.getDelivery().getAddress();
 
+            // 지연 로딩 강제 초기화
 //            order.getOrderItems().forEach(o -> o.getItem().getName());
             this.orderItems = order.getOrderItems().stream()
                 .map(OrderItemDto::new)
@@ -83,6 +85,17 @@ public class OrderApiController {
         final List<Order> allOrdersWithItem = orderRepository.findAllWithItem();
 
         return allOrdersWithItem.stream()
+            .map(OrderDto::new)
+            .collect(Collectors.toList());
+    }
+
+    @GetMapping("/api/v3-1/orders")
+    public List<OrderDto> ordersV3_page(@RequestParam(value = "offset", defaultValue = "0") final int offset,
+                                        @RequestParam(value = "limit", defaultValue = "100") final int limit) {
+
+        final List<Order> allOrders = orderRepository.findAllWithMemberDelivery(offset, limit);
+
+        return allOrders.stream()
             .map(OrderDto::new)
             .collect(Collectors.toList());
     }

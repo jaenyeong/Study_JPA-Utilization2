@@ -6,3 +6,7 @@ GET http://localhost:8080/api/v2/orders
 
 ### v3
 GET http://localhost:8080/api/v3/orders
+
+### v3-1
+### offset을 0으로 설정하면 하이버네이트가 offset 키워드 구문을 제거
+GET http://localhost:8080/api/v3-1/orders?offset=0&limit=100

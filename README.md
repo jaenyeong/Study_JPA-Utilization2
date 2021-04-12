@@ -153,3 +153,56 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
     * 하지만 위험하기 때문에 웬만하면 사용 금지
   * 컬렉션 `fetch join`은 1개만 사용 가능
     * 데이터 정합성 문제로 컬렉션 둘 이상 사용 금지 (예를 들어 1 : N : M 같은 구조)
+  
+### 주문 조회 (Order API) V3-1 페이징 문제 해결
+* 예제에서는 `Order`를 기준으로 페이징 처리 하기를 원함
+  * 하지만 `OrderItem`과 일대다 연관 관계 구조에서 조인을 하면 `OrderItem`을 기준으로 페이징 처리
+
+**페이징 처리 확인 사항**
+* `*ToOne`(`OneToOne`, `ManyToOne`) 관계는 모두 `fetch join`
+  * 데이터 레코드 수를 증가시키지 않아 페이징 쿼리에 영향을 주지 않음
+* 컬렉션은 지연 로딩으로 조회
+* 지연 로딩 성능 최적화를 위해 `hibernate.default_batch_fetch_size`, `@BatchSize` 적용
+  * ~~~
+    spring:
+      jpa:
+        properties:
+          hibernate:
+            default_batch_fetch_size: 100
+    ~~~
+  * `hibernate.default_batch_fetch_size`
+    * 글로벌 설정 (`application.yml` 파일에 설정)
+  * `@BatchSize(size = ?)`
+    * 개별 최적화 (특정 엔티티)
+    * 일대다 관계인 컬렉션은 인스턴스 필드 위에 애너테이션 태깅
+    * 일대일(다대일) 관계는 해당 엔티티 클래스 위에 애너테이션 태깅
+  * 이 옵션을 사용하면 컬렉션이나 프록시 객체를 한꺼번에 설정한 사이즈만큼 `IN` 쿼리로 조회
+    * `IN` 쿼리에 파라미터 개수 설정
+* `offset`의 값을 `0`으로 설정하면 하이버네이트가 `offset` 키워드 구문을 제거
+
+#### V3, V3-1 차이
+* V3 방식은 한 번에 데이터를 가져오나 중복 데이터 존재, DB에서 앱으로 모두 전송 (데이터 전송량이 많게됨)
+* V3-1 방식은 쿼리를 여러 번으로 나눠 전송되지만 데이터 전송량이 최적화되어 DB에서 앱으로 전송
+  * `IN` 쿼리로 필요한 데이터만 찾아옴
+* ~~~
+  public List<Order> findAllWithMemberDelivery(final int offset, final int limit) {
+      return em.createQuery(
+          "select o from Order o"
+              // default_batch_fetch_size 옵션으로 멤버와 딜리버리 생략해도 IN 쿼리로 가져오게 됨
+              // 하지만 DB 쿼리 호출 수 때문에 *ToOne 연관 관계는 join fetch로 가져오는 것이 효율적
+              + " join fetch o.member m"
+              + " join fetch o.delivery d",
+          Order.class)
+          .setFirstResult(offset)
+          .setMaxResults(limit)
+          .getResultList();
+  }
+  ~~~
+
+#### 페이징 처리 정리
+* `ToOne` 관계는 `fetch join`으로 호출 쿼리를 줄이기
+* `ToMany` 관계는 `hibernate.default_batch_fetch_size` 옵션을 사용해 최적화
+* size는 일반적으로 `100`~`1000` 선택 권장
+  * DB 벤더마다 다르나 `1000`이 일반적인 최대치
+  * 애플리케이션(WAS) 측면에서는 몇으로 설정하든 원하는 전체 데이터양을 로딩해야 하므로 메모리 사용량이 같음
+  * 따라서 DB가 순간적인 부하를 얼마나 견딜 수 있는지를 기준으로 선택
