@@ -271,3 +271,43 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
     * 쿼리 한번으로 최적화 되어서 상당히 좋아보이지만, `Order`를 기준으로 페이징이 불가능
     * 실무에서는 이정도 데이터면 수백이나, 수천건 단위로 페이징 처리가 꼭 필요하므로, 이 경우 선택하기 어려운 방법
     * 그리고 데이터가 많으면 중복 전송이 증가해서 V5와 비교해서 성능 차이도 미비
+
+## OSIV(Open Session In View)와 성능 최적화
+* 관례상 OSIV라고 함
+  * Open Session In View : 하이버 네이트
+  * Open EntityManager In View : JPA
+* `spring.jpa.open-in-view` 설정 값은 기본적으로 `true`
+* OSIV 전략은 트랜잭션 시작처럼 최초 DB 커넥션 시작 시점부터 API 응답이 끝날 때 까지 영속성 컨텍스트와 DB 커넥션을 유지
+  * 지연 로딩은 영속성 컨텍스트가 살아있어야 가능하고, 영속성 컨텍스트는 기본적으로 DB 커넥션을 유지
+  * `View Template`이나 API 컨트롤러에서 지연 로딩이 가능한 이유
+  * 하지만 이 전략은 너무 오랜 시간 DB 커넥션을 유지해야하기 때문에 장애로 이어질 수 있음
+  * 만약 컨트롤러에서 외부 API 호출시 응답시간까지 커넥션 리소스를 반환하지 않음
+
+### `spring.jpa.open-in-view` 설정 값을 `false`로 변경
+* `application.yml` 설정
+  ~~~
+  spring:
+    jpa:
+      hibernate:
+        open-in-view: false
+  ~~~
+* 이 경우 영속성 컨텍스트 범위는 `service`~`repository` (DB 커넥션을 짧게 유지)
+* 모든 지연 로딩을 트랜잭션 안에서 처리해야 함 (지연 로딩 코드를 모두 트랜잭션 안으로 넣어야 함)
+  * `View Template`에서 지연 로딩이 동작하지 않음
+* 설정 하면 예제의 주문 조회 V1 API 에러 발생
+  * `controller` 레이어의 `DTO`의 지연 로딩도 마찬가지로 에러 발생 (영속성 컨텍스트가 없기 때문에)
+* 영속성 컨텍스트가 필요한 변환 로직을 별도의 `service`를 생성하여 추출
+
+### 실무에서 OSIV를 끈 상태로 복잡성을 관리하는 방법
+* CQS (Command and Query Separation)
+* 복잡한 앱을 개발한다면 관심사를 분리하여 개발하는 것도 고려할만한 가치가 있음
+  * 예를 들어 `OrderService`를 다음과 같이 나눌 수 있음
+    * `OrderService`
+      * 핵심 비즈니스 로직
+    * `OrderQueryService`
+      * 화면이나 API에 맞춘 서비스 (주로 읽기 전용 트랜잭션 사용)
+
+### OSIV 정리
+* 단순한 경우라면 OSIV를 켜두는 것이 유지보수 측면에서 장점이 많을 수 있음
+* 성능을 최적화하려면 끄는 것이 나을 수 있음
+* 고객 서비스처럼 실시간 API는 OSIV를 `OFF`, ADMIN처럼 커넥션을 많이 사용하지 않는 API는 `ON` 방식도 가능함

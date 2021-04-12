@@ -10,6 +10,8 @@ import com.jaenyeong.jpabook.jpashop.repository.order.query.OrderFlatDto;
 import com.jaenyeong.jpabook.jpashop.repository.order.query.OrderItemQueryDto;
 import com.jaenyeong.jpabook.jpashop.repository.order.query.OrderQueryDto;
 import com.jaenyeong.jpabook.jpashop.repository.order.query.OrderQueryRepository;
+import com.jaenyeong.jpabook.jpashop.service.query.OrderQueryService;
+import com.jaenyeong.jpabook.jpashop.service.query.OsivOrderDto;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -28,6 +29,7 @@ public class OrderApiController {
 
     private final OrderRepository orderRepository;
     private final OrderQueryRepository orderQueryRepository;
+    private final OrderQueryService orderQueryService;
 
     @GetMapping("/api/v1/orders")
     public List<Order> ordersV1() {
@@ -105,6 +107,11 @@ public class OrderApiController {
         return allOrders.stream()
             .map(OrderDto::new)
             .collect(toList());
+    }
+
+    @GetMapping("/api/v3-osiv/orders")
+    public List<OsivOrderDto> ordersV3Osiv() {
+        return orderQueryService.ordersV3();
     }
 
     @GetMapping("/api/v4/orders")

@@ -19,3 +19,6 @@ GET http://localhost:8080/api/v5/orders
 
 ### v6
 GET http://localhost:8080/api/v6/orders
+
+### OSIV
+GET http://localhost:8080/api/v3-osiv/orders
