@@ -212,3 +212,7 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 * `ToOne` 관계를 먼저 조회, `ToMany` 관계는 각각 별도 처리
   * 위에서 얘기했듯 `ToOne` 관계는 데이터 레코드 수가 증가하지 않으나 `ToMany` 관계는 조인시 레코드 수 증가
 * 따라서 `ToOne` 관계는 최적화가 쉬우므로 한 번에 조회, `ToMany` 관계는 `findOrderItems()` 같은 별도의 메서드로 조회
+
+### 주문 조회 (Order API) V5
+* 루트 쿼리는 1번, 컬렉션 쿼리는 1번 실행 (총 2번 전송됨)
+  * `IN` 쿼리를 사용하여 데이터를 가져온 후 `Map`을 통해 메모리에서 그룹핑 처리
