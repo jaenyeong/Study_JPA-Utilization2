@@ -311,3 +311,8 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 * 단순한 경우라면 OSIV를 켜두는 것이 유지보수 측면에서 장점이 많을 수 있음
 * 성능을 최적화하려면 끄는 것이 나을 수 있음
 * 고객 서비스처럼 실시간 API는 OSIV를 `OFF`, ADMIN처럼 커넥션을 많이 사용하지 않는 API는 `ON` 방식도 가능함
+
+## Spring Data JPA
+* `JpaRepository`라는 인터페이스에서 기본적인 `CRUD`를 모두 제공
+* `findByName`처럼 일반화 하기 어려운 기능도 메서드 이름으로 정확한 JPQL 쿼리를 실행
+  * `select m from member m where m.name = :name`

@@ -20,13 +20,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final MemberRepository memberRepository;
     private final ItemRepository itemRepository;
     private final OrderRepository orderRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
     public Long order(final Long memberId, final Long itemId, final int count) {
-        final Member member = memberRepository.findOne(memberId);
+        final Member member = memberRepository.findById(memberId).get();
         final Item item = itemRepository.findOne(itemId);
 
         final Delivery delivery = new Delivery();
