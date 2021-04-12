@@ -133,3 +133,23 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 ### 주문 조회 (Order API) V2
 * `DTO` 안에도 엔티티가 직접 포함되면 안됨
   * 예제에서 `OrderDto` 안에 `OrderItem` 리스트를 `OrderItemDto`로 변환한 리스트를 사용
+
+### 주문 조회 (Order API) V3
+* 일대다 연관 관계 쿼리에서는 다(`Many`) 쪽 데이터(`레코드`) 수와 동일하게 데이터 양이 늘어남
+  * RDBMS 특성상 조인으로 데이터를 가져올 경우 특정 데이터가 중복될 수 밖에 없음
+    * 예제의 경우 `Order` 데이터가 `OrderItem` 데이터로 인해 중복됨
+  * 그러나 `JPA(Hibernate)`가 이 데이터의 객체 그래프를 제대로 생성하지 못함
+* V2 API와 V3 API는 `JPQL` 차이만 있음
+* `fetch join`으로 `SQL`이 한 번만 실행
+  * `JPQL`의 `distinct` 키워드 사용하여 중복 데이터 제거
+    * SQL`에 `distinct` 키워드를 추가할 뿐 아니라 같은 엔티티인 경우 객체 그래프에서 중복을 제거
+  * 단점은 `fetch join`을 사용하면 페이징 처리 불가능
+    * `setFirstResult(), setMaxResults()` 등 명령으로 페이징 불가능
+    * `firstResult/maxResults specified with collection fetch; applying in memory!` 에러
+      * 이 경우 DB에서 페이징 처리를 하지 않고 데이터를 가져온 후 메모리에서 페이징 처리
+      * 따라서 OOM(`Out of memory`) 발생할 수 있음
+    * `fetch join`을 하면 DB에서는 `Order`가 아닌 `OrderItem`을 기준으로 페이징 처리하게 됨
+    * 그래서 일대다의 경우 위 에러를 출력하고 메모리에서 처리
+    * 하지만 위험하기 때문에 웬만하면 사용 금지
+  * 컬렉션 `fetch join`은 1개만 사용 가능
+    * 데이터 정합성 문제로 컬렉션 둘 이상 사용 금지 (예를 들어 1 : N : M 같은 구조)
