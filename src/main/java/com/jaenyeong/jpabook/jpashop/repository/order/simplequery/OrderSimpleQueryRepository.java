@@ -1,4 +1,4 @@
-package com.jaenyeong.jpabook.jpashop.repository.simplequery;
+package com.jaenyeong.jpabook.jpashop.repository.order.simplequery;
 
 import com.jaenyeong.jpabook.jpashop.repository.OrderSimpleQueryDto;
 import lombok.RequiredArgsConstructor;
