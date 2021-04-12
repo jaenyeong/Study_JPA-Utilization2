@@ -50,9 +50,8 @@ public class OrderQueryRepository {
             .getResultList();
 
         // 맵을 사용하여 메모리에서 핸들링
-        final Map<Long, List<OrderItemQueryDto>> orderItemsMap = orderItems.stream()
+        return orderItems.stream()
             .collect(Collectors.groupingBy(OrderItemQueryDto::getOrderId));
-        return orderItemsMap;
     }
 
     private List<OrderQueryDto> findOrders() {
@@ -72,6 +71,17 @@ public class OrderQueryRepository {
                 + " where oi.order.id = :orderId"
             , OrderItemQueryDto.class)
             .setParameter("orderId", orderId)
+            .getResultList();
+    }
+
+    public List<OrderFlatDto> findAllByDto_flat() {
+        return em.createQuery(
+            "select new com.jaenyeong.jpabook.jpashop.repository.order.query.OrderFlatDto(o.id, m.name, o.orderDate, o.status, d.address, i.name, oi.orderPrice, oi.count)"
+                + " from Order o"
+                + " join o.member m"
+                + " join o.delivery d"
+                + " join o.orderItems oi"
+                + " join oi.item i", OrderFlatDto.class)
             .getResultList();
     }
 }
