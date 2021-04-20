@@ -142,7 +142,7 @@ https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JP
 * V2 API와 V3 API는 `JPQL` 차이만 있음
 * `fetch join`으로 `SQL`이 한 번만 실행
   * `JPQL`의 `distinct` 키워드 사용하여 중복 데이터 제거
-    * SQL`에 `distinct` 키워드를 추가할 뿐 아니라 같은 엔티티인 경우 객체 그래프에서 중복을 제거
+    * `SQL`에 `distinct` 키워드를 추가할 뿐 아니라 같은 엔티티인 경우 객체 그래프에서 중복을 제거
   * 단점은 `fetch join`을 사용하면 페이징 처리 불가능
     * `setFirstResult(), setMaxResults()` 등 명령으로 페이징 불가능
     * `firstResult/maxResults specified with collection fetch; applying in memory!` 에러
